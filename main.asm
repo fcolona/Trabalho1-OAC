@@ -5,6 +5,8 @@ msg_opcao_incorreta:	.asciz "Opção Incorreta.\n"
 menu_str:		.asciz "Escolha uma das seguintes opções:\n 1 - Adicionar vagão no início\n 2 - Adicionar vagão no final\n 3 - Remover vagão por ID\n 4 - Listar trem\n 5 - Buscar vagão\n 6 - Sair\n"
 msg_insercao:		.asciz "Informe o tipo do vagão: "
 tipo_locomotiva:	.asciz "Locomotiva"
+msg_nao_encontrado:	.asciz "Vagão não encontrado\n" 
+msg_encontrado:	.asciz "Vagão encontrado\n"
 print_ID:		.asciz "ID: "
 print_tipo:		.asciz "Tipo: "
 print_proximo:		.asciz "Próx: "
@@ -187,8 +189,37 @@ fim_loop_print: 	#print newline
 
 
 
-opcao5: j saida
-opcao6: j saida
+			#coleta input do ID do vagão
+opcao5: 		addi a7, zero, 5
+			ecall
+			add s1, zero, a0 #salva o ID
+			
+			add t0, zero, s0 #aponta o ponteiro pra locomotiva
+loop_busca:		beq t0, zero, vagao_nao_encontrado #se chegou no final, não encontrou
+			
+			lw t1, 0(t0) #carrega ID do vagão atual
+			beq t1, s1, vagao_encontrado #se o ID do atual for igual ao ID a ser buscado, encontrou
+			
+			lw t0, 28(t0) #carrega o endereço do próximo vagão
+			j loop_busca
+			
+			#printa mensagem de vagão não encontrado
+vagao_nao_encontrado:	addi a7, zero, 4
+			la a0, msg_nao_encontrado
+			ecall
+			
+			j menu
+			
+			#printa mensagem de vagão encontrado
+vagao_encontrado:	addi a7, zero, 4
+			la a0, msg_encontrado
+			ecall
+			
+			j menu				
+
+
+
+opcao6: 		j saida
 
 
 saida:			addi a7, zero, 10
