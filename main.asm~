@@ -146,7 +146,7 @@ opcao2: j saida
 opcao3:
 			
 			addi a7, zero, 4
-			la a0, pergunta_remocao
+			la a0, msg_remocao
 			ecall #pede o id do vagao removido
 			
 			addi a7, zero, 5
@@ -179,8 +179,6 @@ nao_pode_remover:
 			addi a7, zero, 4
 			la a0, msg_nao_pode_remover
 			ecall #imprime que o vagão não pode ser removido
-			
-			j menu
 
 nao_encontrado:	
 
