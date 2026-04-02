@@ -317,6 +317,11 @@ listar:			addi sp, sp, -4
 
 			add s1, zero, a1 #aponta o ponteiro pra locomotiva
 loop_print:		beq s1, zero, fim_loop_print #se chegou no final, sai do loop
+
+			#printa parênteses
+			addi a7, zero, 11
+			addi a0, zero, '('
+			ecall
 			
 			#printa ID
 			addi a7, zero, 4
@@ -326,9 +331,14 @@ loop_print:		beq s1, zero, fim_loop_print #se chegou no final, sai do loop
 			lw a0, 0(s1)
 			ecall
 			
-			#printa separação
+			#printa vírgula
 			addi a7, zero, 11
-			addi a0, zero, '|'
+			addi a0, zero, ','
+			ecall
+			
+			#printa espaço
+			addi a7, zero, 11
+			addi a0, zero, ' '
 			ecall
 			
 			#printa tipo
@@ -339,17 +349,24 @@ loop_print:		beq s1, zero, fim_loop_print #se chegou no final, sai do loop
 			addi a0, s1, 4 #calcula offset do tipo
 			ecall
 			
-			#printa separação
+			#printa parênteses
 			addi a7, zero, 11
-			addi a0, zero, '|'
+			addi a0, zero, ')'
+			ecall
+			
+			lw s1, 28(s1) #carrega o próximo vagão
+			beq s1, zero, fim_loop_print #se chegou no fim, não printa a seta
+			
+			#printa espaço
+			addi a7, zero, 11
+			addi a0, zero, ' '
 			ecall
 			
 			#printa seta
 			addi a7, zero, 4
 			la a0, print_seta
 			ecall		
-			
-			lw s1, 28(s1)
+		
 			j loop_print
 
 fim_loop_print: 	#print newline
