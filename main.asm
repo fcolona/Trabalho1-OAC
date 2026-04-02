@@ -43,23 +43,14 @@ main:			#aloca memória para a locomotiva
 			sw s9, 0(s0)
 			
 			#carrega ponteiro de próximo como 0
-			sw zero, 24(s0)
+			sw zero, 28(s0)
 			
 			#carrega o campo como "locomotiva"
-			la t0, tipo_locomotiva #aponta o ponteiro pro início da string tipo
-			addi t1, s0, 4 #calcula o offset do campo "tipo" e aponta pra lá
-			
-			# RENOMEAR LOOP_LOAD PARA COPIA_PROX_CHAR OU ALGO ASSIM
-			
-loop_load:		lbu t2, 0(t0) #pega o caractere atual da string tipo
-			sb t2, 0(t1) #copia o caractere para o campo
-			beq t2, zero, fim_loop_load #se o caractere for igual a zero, acabou a cópia
-			
-			addi t0, t0, 1 #incrementa o ponteiro da string tipo
-			addi t1, t1, 1 #incrementa o ponteiro do campo "tipo"
-			j loop_load
+			la a1, tipo_locomotiva #aponta o ponteiro de src pro início da string tipo_locomotiva
+			addi a2, s0, 4 #calcula o offset do campo "tipo" e aponta o ponteiro de dst pra lá
+			jal copiar_string #copia a string de src pra dst
 
-fim_loop_load:		#printa msg de boas vindas
+			#printa msg de boas vindas
 			addi a7, zero, 4
 			la a0, msg_boas_vindas
 			ecall
@@ -125,17 +116,9 @@ opcao1:			#aloca memória para o novo vagão
 			addi a1, zero, 23 #define o máximo de caracteres
 			ecall
 			
-			#remove o \n, caso houver
-			addi t0, s2, 4 #aponta o ponteiro pro primeiro caractere
-			addi t2, zero, '\n'
-			addi t3, zero, '\0'
-loop_remocao_nl:	lbu t1, 0(t0) #pega o caractere atual
-			beq t1, t2, fim_loop_remocao_nl
-			beq t1, t3, fim_loop_remocao_nl
-			addi t0, t0, 1 #vai pro próximo caractere
-			j loop_remocao_nl
+			addi a1, s2, 4 #aponta o ponteiro pro primeiro caractere da string
+			jal remover_new_line
 			
-fim_loop_remocao_nl:	sb t3, 0(t0) #troca o \n (ou o próprio \0) por um \0
 			j menu
 			
 opcao2:
@@ -143,7 +126,7 @@ opcao2:
 			addi a7, zero, 9
 			addi a0, zero, 32
 			ecall
-			add s2, zero, a0 #salva o enderecoo do novo vagao em s2
+			add s2, zero, a0 #salva o endereco do novo vagao em s2
 
 			#printa a mensagem de insercao
 			addi a7, zero, 4
@@ -153,20 +136,12 @@ opcao2:
 			#armazena o input tipo do vagao
 			addi a7, zero, 8
 			addi a0, s2, 4 
-			addi a1, zero, 23 # max de caracteres
+			addi a1, zero, 23 #max de caracteres
 			ecall
 			
 			#remover o \n 
-			addi t0, s2, 4 
-			addi t2, zero, '\n'
-			addi t3, zero, '\0'
-loop_remocao_nl2:	lbu t1, 0(t0)  #pega o caractere atual
-			beq t1, t2, fim_loop_remocao_nl2
-			beq t1, t3, fim_loop_remocao_nl2
-			addi t0, t0, 1 #vai pro proximo caractere
-			j loop_remocao_nl2
-			
-fim_loop_remocao_nl2:	sb t3, 0(t0) #troca o \n por \0
+			addi a1, s2, 4 #aponta o ponteiro pro primeiro caractere da string
+			jal remover_new_line
 
 			#como ele vai pro fim, o prox ponteiro dele tem que ser zero
 			sw zero, 28(s2)
@@ -176,18 +151,18 @@ fim_loop_remocao_nl2:	sb t3, 0(t0) #troca o \n por \0
 			sw s9, 0(s2)
 
 			add t0, zero, s0 # t0 começa na locomotiva
-
 loop_busca_fim:		lw t1, 28(t0) #carrega o ponteiro prox do vagao atual
-			beq t1, zero, achei_o_fim #se for 0 t0 é o ultimo vagao e sai do loop
-			add t0, zero, t1 #se nao for 0 avanca t0 para o proximo vagao
+			beq t1, zero, encontrou_o_fim #se for igual a 0, t0 é o ultimo vagao e sai do loop
+			add t0, zero, t1 #se nao for igual a 0, avanca t0 para o proximo vagao
 			j loop_busca_fim
 
-achei_o_fim:		#t0 tem o endereco do (antigo) ultimo vagao
-			sw s2, 28(t0) #salva o endereço do novoi vagao (s2) no campo prox do ultimo (t0)
+encontrou_o_fim:	#t0 tem o endereco do (antigo) ultimo vagao
+			sw s2, 28(t0) #salva o endereço do novo vagao (s2) no campo prox do ultimo (t0)
 
 			j menu
-opcao3:
 			
+			
+opcao3:
 			addi a7, zero, 4
 			la a0, pergunta_remocao
 			ecall #pede o id do vagao removido
@@ -198,14 +173,14 @@ opcao3:
 			
 			add s2, zero, s0 #carrega o endereço da locomotiva em s2
 			lw t0, 0(s2) #guarda o id do vagao atual em t0
-loop:		beq t0, s1, remover #se o id do vagao atual for igual ao id digitado
+loop:			beq t0, s1, remover #se o id do vagao atual for igual ao id digitado
 			add s3, zero, s2 #guardar o endereço do vagão atual num registrador de backup
 			lw s2, 28(s2) #carrega o endereço da proxima locomotiva em s2
 			beq s2, zero, nao_encontrado # se o endereço da proxima locomotiva for 0, o vagao nao foi encontrado
 			lw t0, 0(s2) #guarda o id do vagao atual em t0
 			j loop
 
-remover:	#primeiro, vamos checar se o vagao encontrado é a locomotiva
+remover:		#primeiro, vamos checar se o vagao encontrado é a locomotiva
 			beq	s2, s0, nao_pode_remover
 
 			#nesse estagio, s2 guarda o endereço do vagao que se deve remover, e s3 guarda o endereço do vagao antes
@@ -262,19 +237,6 @@ loop_print:		beq t0, zero, fim_loop_print #se chegou no final, sai do loop
 			addi a0, zero, '|'
 			ecall
 			
-			#printa próximo
-			#addi a7, zero, 4
-			#la a0, print_proximo       #PARA DEBUG
-			#ecall
-			#addi a7, zero, 1
-			#lw a0, 28(t0)
-			#ecall
-			
-			#printa separação
-			#addi a7, zero, 11         #PARA DEBUG
-			#addi a0, zero, '|'
-			#ecall
-			
 			#printa seta
 			addi a7, zero, 4
 			la a0, print_seta
@@ -326,5 +288,47 @@ opcao6: 		j saida
 
 saida:			addi a7, zero, 10
 			ecall
+			
+			
+################################################
+# 					       #	
+#		PROCEDIMENTOS	       	       #
+#					       #	
+################################################
+			
+# a1: endereço do src
+# a2: endereço do dst
+copiar_string:		addi sp, sp, -4 #reserva espaço na pilha 
+			sw ra, 0(sp)  #salva o return address
+
+			lbu t2, 0(a1) #pega o caractere atual da string src
+			sb t2, 0(a2) #copia o caractere para a string dst
+			beq t2, zero, fim_copia #se o caractere for igual a zero, acabou a cópia
+			addi a1, a1, 1 #incrementa o ponteiro do src
+			addi a2, a2, 1 #incrementa o ponteiro do dst
+			j copiar_string
+			
+fim_copia:		lw ra, 0(sp) #restaura o return address
+    			addi sp, sp, 4 #libera o espaço na pilha
+			jr ra
+			
+
+# a1: endereço da str
+#remove o \n, caso houver
+remover_new_line:	addi sp, sp, -4 #reserva espaço na pilha 
+			sw ra, 0(sp)  #salva o return address
+			
+			addi t2, zero, '\n'
+			addi t3, zero, '\0'
+loop_remocao_nl:	lbu t1, 0(a1) #pega o caractere atual
+			beq t1, t2, fim_loop_remocao_nl
+			beq t1, t3, fim_loop_remocao_nl
+			addi a1, a1, 1 #vai pro próximo caractere
+			j loop_remocao_nl
+			
+fim_loop_remocao_nl:	sb t3, 0(a1) #troca o \n (ou o próprio \0) por um \0
+			lw ra, 0(sp) #restaura o return address
+    			addi sp, sp, 4 #libera o espaço na pilha
+			jr ra
 
 			
