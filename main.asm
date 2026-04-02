@@ -138,11 +138,54 @@ loop_remocao_nl:	lbu t1, 0(t0) #pega o caractere atual
 fim_loop_remocao_nl:	sb t3, 0(t0) #troca o \n (ou o próprio \0) por um \0
 			j menu
 			
+opcao2:
+			#aloca memoria para o novo vagao
+			addi a7, zero, 9
+			addi a0, zero, 32
+			ecall
+			add s2, zero, a0 #salva o enderecoo do novo vagao em s2
+
+			#printa a mensagem de insercao
+			addi a7, zero, 4
+			la a0, msg_insercao
+			ecall
 			
+			#armazena o input tipo do vagao
+			addi a7, zero, 8
+			addi a0, s2, 4 
+			addi a1, zero, 23 # max de caracteres
+			ecall
+			
+			#remover o \n 
+			addi t0, s2, 4 
+			addi t2, zero, '\n'
+			addi t3, zero, '\0'
+loop_remocao_nl2:	lbu t1, 0(t0)  #pega o caractere atual
+			beq t1, t2, fim_loop_remocao_nl2
+			beq t1, t3, fim_loop_remocao_nl2
+			addi t0, t0, 1 #vai pro proximo caractere
+			j loop_remocao_nl2
+			
+fim_loop_remocao_nl2:	sb t3, 0(t0) #troca o \n por \0
 
+			#como ele vai pro fim, o prox ponteiro dele tem que ser zero
+			sw zero, 28(s2)
+			
+			#incrementa o ID
+			addi s9, s9, 1 
+			sw s9, 0(s2)
 
+			add t0, zero, s0 # t0 começa na locomotiva
 
-opcao2: j saida
+loop_busca_fim:		lw t1, 28(t0) #carrega o ponteiro prox do vagao atual
+			beq t1, zero, achei_o_fim #se for 0 t0 é o ultimo vagao e sai do loop
+			add t0, zero, t1 #se nao for 0 avanca t0 para o proximo vagao
+			j loop_busca_fim
+
+achei_o_fim:		#t0 tem o endereco do (antigo) ultimo vagao
+			sw s2, 28(t0) #salva o endereço do novoi vagao (s2) no campo prox do ultimo (t0)
+
+			j menu
 opcao3:
 			
 			addi a7, zero, 4
@@ -184,7 +227,7 @@ nao_pode_remover:
 
 nao_encontrado:	
 
-			add a7, zero, 4
+			addi a7, zero, 4
 			la a0, msg_nao_encontrado
 			ecall #imprime que o vagão não foi encontrado
 			
