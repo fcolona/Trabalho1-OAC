@@ -18,6 +18,10 @@ print_seta:		.asciz "-> "
 			.align 2
 			.globl main
 
+
+
+
+
 			################################################
 			# 					       #	
 			#	    Integrantes do Grupo	       #
@@ -27,18 +31,45 @@ print_seta:		.asciz "-> "
 				#Pedro Henrique Vicente Medeiros Da Silva - 17014942
 				#Guilherme Cavalcanti de Santana - 15456556
 			
-							
+			# ESTRUTURA DE UM VAGÃO
+				#ID: 4 bytes
+				#Tipo: 24 bytes
+				#Ptr Próx: 4 bytes
+				#total: 32 bytes por vagão
+
+			# Diagrama ilustrativo de um trem com três vagões:
+
+			                     1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+			+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+			|   1   |                 Locomotiva                    |proximo| ----
+			+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+    |
+			                                                                     |
+			 |--------------------------------------------------------------------
+			 |
+			 v                   1                   2                   3
+                                 1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+			+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+			|   ID  |                      Tipo                     |proximo| ----
+			+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+    |
+			                                                                     |
+			 |--------------------------------------------------------------------
+			 |
+			 v                   1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+			+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+			|   ID  |                      Tipo                     |  zero |
+			+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+
+
+
 			# SIGNIFICADO DOS REGISTRADORES NA MAIN/MENU:
 			# s0 guarda o endereço da locomotiva
-			# s1 guarda inteiro input do usuário
+			# s1 guarda opção escolhida pelo usuário
 			# s9 último ID utilizado
-			
-			# ESTRUTURA DE UM VAGÃO
-			#ID: 4 bytes
-			#Tipo: 24 bytes
-			#Ptr Próx: 4 bytes
-			#total: 32 bytes por vagão
-			# FAZER UMA ASCII ARTE DO VAGÃO SERIA BACANA
 	
 main:			#aloca memória para a locomotiva						
 			addi a7, zero, 9
@@ -191,7 +222,7 @@ inserir_inicio:		addi sp, sp, -16 #reserva espaço na pilha
 	            	#coleta input de tipo do vagão
 	            	addi a7, zero, 8
 	            	addi a0, s3, 4 #calcula o offset do tipo de vagão
-	            	addi a1, zero, 23 #define o máximo de caracteres
+	            	addi a1, zero, 23 #define o máximo de caracteres do tipo
 	            	ecall
 	
 	            	addi a1, s3, 4 #aponta o ponteiro pro primeiro caractere da string
@@ -285,8 +316,8 @@ remover:		add t2, zero, a1 #carrega o endereço da locomotiva
 			lw t0, 0(t2) #guarda o id do vagao atual
 loop:			beq t0, a2, efetuar_remocao #se o id do vagao atual for igual ao id digitado
 			add t3, zero, t2 #guardar o endereço do vagão atual num registrador de backup
-			lw t2, 28(t2) #carrega o endereço da proxima locomotiva
-			beq t2, zero, nao_encontrado # se o endereço da proxima locomotiva for 0, o vagao nao foi encontrado
+			lw t2, 28(t2) #carrega o endereço do proximo vagão
+			beq t2, zero, nao_encontrado # se o endereço do proximo vagão for 0, o vagao nao foi encontrado
 			lw t0, 0(t2) #guarda o id do vagao atual
 			j loop
 
