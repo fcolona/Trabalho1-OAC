@@ -17,13 +17,23 @@ print_seta:		.asciz "-> "
 			.text
 			.align 2
 			.globl main
+
+			################################################
+			# 					       #	
+			#	    Integrantes do Grupo	       #
+			#					       #	
+			################################################
+				#Felipe Ferreira Colona - 15636525
+				#Pedro Henrique Vicente Medeiros Da Silva - 17014942
+				#Guilherme Cavalcanti de Santana - 15456556
 			
+							
 			# SIGNIFICADO DOS REGISTRADORES NA MAIN/MENU:
 			# s0 guarda o endereço da locomotiva
 			# s1 guarda inteiro input do usuário
 			# s9 último ID utilizado
 			
-			# ESTRUTURA DA STRUCT DE UM VAGÃO
+			# ESTRUTURA DE UM VAGÃO
 			#ID: 4 bytes
 			#Tipo: 24 bytes
 			#Ptr Próx: 4 bytes
@@ -84,11 +94,11 @@ menu:			#printa menu
 			j menu
 			
 			
-################################################
-# 					       #	
-#		OPÇÕES DO MENU	       	       #
-#					       #	
-################################################
+			################################################
+			# 					       #	
+			#		OPÇÕES DO MENU	       	       #
+			#					       #	
+			################################################
 
 
 opcao1:			add a1, zero, s0 #passa o endereço da locomotiva como parâmetro
@@ -135,11 +145,11 @@ opcao6: 		addi a7, zero, 10
 			ecall		
 
 
-################################################
-# 					       #	
-#	      OPERAÇÕES DA LISTA       	       #
-#					       #	
-################################################			
+			################################################
+			# 					       #	
+			#	      OPERAÇÕES DA LISTA       	       #
+			#					       #	
+			################################################			
 
 #DESCRIÇÃO:
 #	insere vagão no início (logo antes da 
@@ -408,11 +418,11 @@ vagao_encontrado:	addi a7, zero, 4
 			
 			
 			
-################################################
-# 					       #	
-#	  PROCEDIMENTOS UTILITÁRIOS    	       #
-#					       #	
-################################################
+			################################################
+			# 					       #	
+			#	  PROCEDIMENTOS UTILITÁRIOS    	       #
+			#					       #	
+			################################################
 
 #DESCRIÇÃO:
 #	copia uma string de um endereço de origem
